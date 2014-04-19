@@ -1,0 +1,206 @@
+UEF 3622213 Regressiotekniikat, harj työ 2 
+========================================================
+
+Elina Jeskanen, 256916
+-----------------------
+
+
+
+
+11.32. (a) Describe distributions.
+-----------------------------------
+
+```{r}
+pcb = read.csv2("C:/Users/Elina/Dataa/pcb.csv", header=TRUE, sep = ";")
+attach(pcb)
+
+summary(pcb52)
+plot(pcb$pcb,pcb52)
+hist(pcb52)
+boxplot(pcb52)
+summary(pcb118)
+plot(pcb$pcb,pcb118)
+hist(pcb118)
+boxplot(pcb118)
+summary(pcb138)
+plot(pcb$pcb,pcb138)
+hist(pcb138)
+boxplot(pcb138)
+summary(pcb180)
+plot(pcb$pcb,pcb180)
+hist(pcb180)
+boxplot(pcb180)
+```
+
+All the congeners of pcb would have quite uniform distributions, but due to a few observations having remarkably higher values the distributions end up being strongly right squed.
+
+Most of the observations are scattered together, but then there seems to be 2 to 5 higher values for each variable, boxplot suggests that even 5 to 8 outliers per variable would be found. 
+
+This can also be seen in the summary statistics: the mean is significantly higher than the median, in one case even larger than the 3rd quartile and the maximum value for all these variables 5 to almost 10 times higher than the mean.
+
+However the simple scatter plots show that the variables vary very similarly to each other when compared to pcb.
+
+
+
+
+
+11.32. (b) Relationships between variables
+------------------------------------------
+
+```{r}
+fourpcb=cbind(pcb52,pcb118,pcb138,pcb180)
+cor(fourpcb)
+
+plot(pcb52, pcb118)
+cor.test(pcb52, pcb118)
+plot(pcb52, pcb138)
+cor.test(pcb52, pcb138)
+plot(pcb52, pcb180)
+cor.test(pcb52, pcb180)
+plot(pcb118, pcb138)
+cor.test(pcb118, pcb138)
+plot(pcb118, pcb180)
+cor.test(pcb118, pcb180)
+plot(pcb138, pcb180)
+cor.test(pcb138, pcb180) ## How could I get only the p-value and correlation out of this output?
+```
+
+All the four congeners of pcb are positively correlated to each other.Pcb138 and pcb180 have the highest correlation at 0.88. Pcb52 and pcb180 has the lowest correlation at 0.09 and the correlation is not significant (p-value=0.48). All the other variables are significantly correlated with each other. 
+
+It seems like the data is most correlated at lower values and the largest values, the "outliers" seem to be causing most of the uncorrelation.  
+
+
+
+
+11.33. (a) Predict pcb with Multipe regression. Write the model and include assumptions.
+-------------------------------------
+
+The model:
+
+y_i=beta_0 + beta_1 * x_i1 + beta_2 * x_i2 + ... + beta_k * x_ik + epsilon_i 
+
+Assumptions:
+
+The error epsilon is an independent variable with a mean of zero and variance of sigma squared.
+
+
+
+11.33. (b) RUn regression and summarize results.
+-----------------------------------------------
+
+```{r}
+model=lm(pcb$pcb~fourpcb)
+summary(model)
+```
+
+The model:
+pcb= 11.87*pcb52 + 3.76*pcb118 + 3.88*pcb138 + 4.18*pcb180
+
+All the variables seem to be very significant. Only the intercept is not significant and it can be left out of the model. The R-squared is also very high, 0.9891, and so the model seems to be intrepreting very well pcb.
+
+
+
+11.33. (c) Examine the residuals and their normality. Plot them against variables and look for patterns.
+-----------------------------------------------
+
+```{r}
+pcb_predict= as.numeric(predict(model,data.frame(fourpcb)))
+residuals=pcb$pcb-pcb_predict
+hist(residuals) 
+plot(residuals)
+qqplot(residuals,pcb$pcb)
+plot(residuals,pcb$pcb)
+plot(residuals,pcb52)
+plot(residuals,pcb118)
+plot(residuals,pcb138)
+plot(residuals,pcb180)
+```
+
+As expected, the residuals have bigger values when the amount of pcb is bigger. The residuals seem to be normal as seen in the histogram.
+However the scatterplot shows nonlinearity in variance and heteroskedastisity, since residuals seem to be the bigger the bigger the dependent and the explanatory variables are.
+
+
+
+11.34. (a) Specimen numbers of over- and underestimating outliers.
+--------------------------------------------
+
+```{r}
+plot(residuals,pcb$pcb)
+c(max(residuals),which(residuals == max(residuals), arr.ind = TRUE))
+c(max(residuals),which(residuals == min(residuals), arr.ind = TRUE))
+```
+
+The specimen for which the model is underestimating its value, is the specimen for which the residual is maximum and is specimen number 65.
+
+The specimen for which the model is overestimating its value, is the specimen for which the residual is minimum and is specimen number 50.
+
+
+
+11.34 (b) Rerun the analysis with the two suspected outliers omitted and compare results.
+------------------------------------------------------
+
+```{r}
+pcb_oo=rbind(pcb[1:49,],pcb[51:64,],pcb[66:69,])
+fourpcb_oo=cbind(pcb_oo$pcb52,pcb_oo$pcb118,pcb_oo$pcb138,pcb_oo$pcb180)
+model_oo=lm(pcb_oo$pcb~fourpcb_oo)
+summary(model)
+summary(model_oo)
+pcb_predict_oo= as.numeric(predict(model_oo,data.frame(fourpcb_oo)))
+residuals_oo=pcb_oo$pcb-pcb_predict_oo
+plot(residuals_oo, pcb_oo$pcb)
+plot(residuals_oo) ## This has lost it's "trumpet"" shape also. But what does the "index" express here?
+qqplot(residuals_oo,pcb_oo$pcb)
+```
+
+By omitting the two outliers the residuals have nearly lost their heteroskedastisity! 
+
+Also the new model follows the data better: the signifigance of the variables have gone up and the R squared is now 0.99. 
+
+But can we do so? What if they were real values and not outliers?
+
+'
+'
+'
+'
+'
+'
+'
+'
+'
+'
+'
+
+
+
+
+
+
+
+
+Extra plots and calculations
+---------------------------
+
+```{r}
+plot(residuals_oo,pcb_oo$pcb52)
+plot(residuals,pcb52)
+plot(residuals_oo,pcb_oo$pcb118)
+plot(residuals,pcb118)
+plot(residuals_oo,pcb_oo$pcb138)
+plot(residuals,pcb138)
+plot(residuals_oo,pcb_oo$pcb180)
+plot(residuals,pcb180)
+cor(fourpcb)
+cor(fourpcb_oo)
+plot(pcb_oo$pcb52, pcb_oo$pcb118)
+cor.test(pcb_oo$pcb52, pcb_oo$pcb118)
+plot(pcb_oo$pcb52, pcb_oo$pcb138)
+cor.test(pcb_oo$pcb52, pcb_oo$pcb138)
+plot(pcb_oo$pcb52, pcb_oo$pcb180)
+cor.test(pcb_oo$pcb52, pcb_oo$pcb180)
+plot(pcb_oo$pcb118, pcb_oo$pcb138)
+cor.test(pcb_oo$pcb118, pcb_oo$pcb138)
+plot(pcb_oo$pcb118, pcb_oo$pcb180)
+cor.test(pcb_oo$pcb118, pcb_oo$pcb180)
+plot(pcb_oo$pcb138, pcb_oo$pcb180)
+cor.test(pcb_oo$pcb138, pcb_oo$pcb180)
+detach(pcb)

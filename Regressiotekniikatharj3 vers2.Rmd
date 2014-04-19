@@ -1,0 +1,220 @@
+UEF 3622213 Regressiotekniikat, harj työ 3 
+========================================================
+
+Elina Jeskanen, 256916
+-----------------------
+
+
+16.35 a) muuttujana sairaala
+------------------------------
+
+Asetetaaan sairaala A :lle arvo 0 ja sairaala B:lle 1
+
+Tällöin log odds sairaalalle A on
+
+log((63/2100)/(1-(63/2100))) = Beta0
+
+ja siten Beta0=
+
+```{r}
+log((63/2100)/(1-(63/2100)))
+```
+
+ja sairaalalle B
+
+log((16/800)/(1-(16/800))) = Beta0 + Beta1
+
+joten Beta1=
+
+```{r }
+log((16/800)/(1-(16/800)))-log((63/2100)/(1-(63/2100)))
+```
+
+tämä on logaritmisten vedonlyöntisuhteiden erotus, joka voidaan muuttaa helpommin ymmärrettävään muotoon:
+
+odds(sairaala B)/odds(sairaala A)=e^Beta1
+
+eli vedonlyöntisuhteiden suhteeksi, joka on tässä:
+```{r }
+exp(log((16/800)/(1-(16/800)))-log((63/2100)/(1-(63/2100))))
+```
+
+luottamusväli vedonlyöntisuhteille on samaa muotoa kuin keskiarvoille eli ln(odds ratio)+-1.96 * SE ln(odds ratio)
+
+SE saadaan kaavasta:  neliöjuuri(1/sair_A_kuolema+1/sair_B_kuolema+sair_A_eikuolema+sair_B_eikuolema)
+
+
+```{r }
+SE=sqrt(1/63+1/2037+1/18+1/784)
+```
+
+luottamusväli:
+
+```{r }
+exp(log((16/800)/(1-(16/800)))-log((63/2100)/(1-(63/2100)))-1.96*SE)
+exp(log((16/800)/(1-(16/800)))-log((63/2100)/(1-(63/2100)))+1.96*SE)
+```
+
+Eli tulkinta: Kuoleman todennäköisyys sairaalassa B on pienempi kuin sairaalassa A (0,66 < 1), mutta tulos ei ole merkitsevä, koska arvo 1 sijoittuu luottamusvälille.
+
+#PS Spss antaa saman kuoleman todennäköisyyden, mutta luottamusväli on hieman leveämpi (0,379, 1,149)
+
+
+16.35 b) Muuttujana sairaala ja potilaan kunto
+----------------------------------------------
+
+Sairaala A :lla edelleen arvo 0 ja sairaala B:llä 1
+
+Hyvävointisilla potilailla:
+--------------------------
+
+Log odds sairaalalle A on
+
+log((6/600)/(1-(6/600))) = Beta0
+
+ja siten Beta0=
+
+```{r}
+log((6/600)/(1-(6/600)))
+```
+
+ja sairaalalle B
+
+log((8/600)/(1-(8/600))) = Beta0 + Beta1
+
+joten Beta1=
+
+```{r }
+log((8/600)/(1-(8/600)))-log((6/600)/(1-(6/600)))
+```
+
+tämä on logaritmisten vedonlyöntisuhteiden erotus, joka voidaan muuttaa helpommin ymmärrettävään muotoon:
+
+odds(sairaala B)/odds(sairaala A)=e^Beta1
+
+eli vedonlyöntisuhteiden suhteeksi, joka on tässä:
+```{r }
+exp(log((8/600)/(1-(8/600)))-log((6/600)/(1-(6/600))))
+```
+
+luottamusväli vedonlyöntisuhteille on samaa muotoa kuin keskiarvoille eli ln(odds ratio)+-1.96 * SE ln(odds ratio)
+
+SE saadaan kaavasta:  neliöjuuri(1/sair_A_kuolema+1/sair_B_kuolema+sair_A_eikuolema+sair_B_eikuolema)
+
+
+```{r }
+SE2=sqrt(1/6+1/8+1/594+1/592)
+```
+
+luottamusväli:
+
+```{r }
+exp((log((8/600)/(1-(8/600)))-log((6/600)/(1-(6/600))))-1.96*SE2)
+exp((log((8/600)/(1-(8/600)))-log((6/600)/(1-(6/600))))+1.96*SE2)
+```
+
+Tulkinta: Hyväkuntoisille potilaille Sairaala B näyttäisi yllätteän suurempaa kuoleman riskiä (1,338 > 1) kuin sairaala A.
+
+
+Huonovointisilla potilailla:
+--------------------------
+
+Log odds sairaalalle A on
+
+log((57/1500)/(1-(57/1500))) = Beta0
+
+ja siten Beta0=
+
+```{r}
+log((57/1500)/(1-(57/1500)))
+```
+
+ja sairaalalle B
+
+log(((8/200))/(1-(8/200))) = Beta0 + Beta1
+
+joten Beta1=
+
+```{r }
+log((8/200)/(1-(8/200)))-log((57/1500)/(1-(57/1500)))
+```
+
+tämä on logaritmisten vedonlyöntisuhteiden erotus, joka voidaan muuttaa helpommin ymmärrettävään muotoon:
+
+odds(sairaala B)/odds(sairaala A)=e^Beta1
+
+eli vedonlyöntisuhteiden suhteeksi, joka on tässä:
+```{r }
+exp(log((8/200)/(1-(8/200)))-log((57/1500)/(1-(57/1500))))
+```
+
+luottamusväli vedonlyöntisuhteille on samaa muotoa kuin keskiarvoille eli ln(odds ratio)+-1.96 * SE ln(odds ratio)
+
+SE saadaan kaavasta:  neliöjuuri(1/sair_A_kuolema+1/sair_B_kuolema+sair_A_eikuolema+sair_B_eikuolema)
+
+
+```{r }
+SE3=sqrt(1/57+1/8+1/1443+1/192)
+```
+
+luottamusväli:
+
+```{r }
+exp((log((8/200)/(1-(8/200)))-log((57/1500)/(1-(57/1500))))-1.96*SE3)
+exp((log((8/200)/(1-(8/200)))-log((57/1500)/(1-(57/1500))))+1.96*SE3)
+```
+
+Tulkinta: Myös huonokuntoisille potilaille Sairaala B näyttäisi yllätteän suurempaa kuoleman riskiä kuin sairaala A (1,055 > 1).
+
+16.35 c) Selitys Simpsonin paradoksille kuten se ilmenee kohdista a) ja b)
+---------
+Sairaala B:n potilailla näyttäisi olevan pienempi logg odds kuolla verrattuna Sairaalan A potilaisiin. Mutta kun otetaan huomioon hoitoon tulevien potilaiden kunto, näyttää kuolemanriski sekä hyvä-, että huonokuntoisille potilaille Sairaalassa B suuremmalta kuin Sairaalalle A. 
+
+
+Kuulin tunnilla (9.4.), että analyysin voi tehdä myös R:n glm funktiolla ehtona family=binomial, joten tässä se versio vielä:
+---
+
+Pelkästään sairaala selittävänä tekijänä:
+
+```{r }
+hospitals1=read.csv("Hospitals1.csv",header=TRUE, sep=";")
+attach(hospitals1)
+hospitals1
+malli1=glm(cbind(died, survived)~., hospitals1, family=binomial)
+summary(malli1)
+```
+
+odd ratio(OR) saadaan kulmakertoimesta ja luottamusväli OR:stä:
+```{r }
+exp(coef(malli1))
+exp(cbind(OR = coef(malli1), confint(malli1)))
+detach(hospitals1)
+
+```
+
+Sairaala ja potilaan kunto selittävinä tekijöinä:
+
+```{r }
+hospitals2=read.csv("Hospitalscsv.csv",header=TRUE, sep=";")
+attach(hospitals2)
+hospitals2
+malli2=glm(cbind(died, survived)~., hospitals2, family=binomial)
+summary(malli2)
+```
+
+odd ratio(OR) ja luottamusväli kahdella muuttujalla:
+```{r }
+exp(coef(malli2))
+exp(cbind(OR = coef(malli2), confint(malli2)))
+detach(hospitals2)
+```
+
+Tulkinta:
+--------
+Malli1:ssä, jossa oli muuttujana vain sairaala, odds ratio sairaalalle B oli alle yksi (0,66), niin riski kuolla siellä näytti pienemmältä kuin sairaalassa A.
+
+Kun otettiin huomioon potilaiden kunto, odds ratio "kuoleman riski" sairaalalle B kasvoi yli yhden (1,14). Eli kuoleman riski olisikin suurempi sairaalassa B kuin sairaalassa A ottaen kun potilaan kunto otetaan huomioon.
+
+Kysymys:
+----
+Miten näistä luvuista näkisi sen, että nyt sekä huonovointisilla että hyvävointisilla, eli molemmilla potilasryhmillä näyttää olevan korkeampi kuoleman riski sairaalassa B kuin sairaalassa A (miten näkyisi se, että jos vain esim huonokuntoisilla olisi suurempi riski kuolla sairaalassa B kuin sairaalassa A)?

@@ -1,0 +1,175 @@
+UEF 3622213 Regressiotekniikat, harj työ 1 
+========================================================
+
+Elina Jeskanen, 256916
+-----------------------
+
+Data:
+```{r}
+Area=c(21,34,6,47,10,49,23,32,12,16,29,49,28,8,57,9,31,10,21,26,31,52,21,8,18,5,18,26,27,26,32,2,59,58,19,14,16,9,23,28,34,70,69,54,39,9,21,54,26)
+
+IBI=c(47,76,33,78,62,78,33,64,83,67,61,85,46,53,55,71,59,41,82,56,39,89,32,43,29,55,81,82,82,85,59,74,80,88,29,58,71,60,86,91,72,89,80,84,54,71,75,84,79)
+
+AreaIBI=data.frame(Area,IBI)
+
+```
+10.4.(a) Numerical and graphical description of data
+----------------------------------------------------
+```{r}
+summary(IBI)
+sd(IBI)
+plot(IBI)
+boxplot(IBI)
+qqnorm(IBI)
+summary(Area)
+plot(Area)
+qqnorm(Area)
+boxplot(Area)
+```
+10.4.(b) Plot relationship. Outliers?
+-------------------------------------
+```{r}
+plot(Area,IBI)
+qqplot(Area,IBI)
+```
+Relationship between Area and IBI seems to be positive, though variance in IBI especially for smaller areas seems to be quite high. 
+
+There doesn't seem to be outliers.
+
+
+10.4.(c) Simple linear regression model.
+----------------------------------------
+
+IBI = Beta0 + Beta1 * Area
+
+
+10.4.(d) Hypotheses.
+--------------------
+H0: Beta1 = 0
+H1: Beta1 != 0
+
+
+10.4.(e) Run simple regression.
+-------------------------------
+```{r}
+olsIBI=lm(IBI~Area)
+summary(olsIBI)
+```
+
+Ols model: IBI = 52,923 + 0,4602 * Area
+
+H0 can be rejected on the 0.001 significance level, and so there is a significant relationship between IBI and Area. 
+
+Intuition: There is only 0,1% chance that this kind of relationship would be the result of randomness.
+
+
+10.4.(f) Residuals. Anything unusual?
+-------------------------------------
+
+```{r}
+resIBI=residuals(olsIBI)
+plot(Area,resIBI)
+
+```
+
+It is confirmed, that there are larger residuals in IBI, when the Area is small compared to cases where Area is big.
+
+10.4.(g) Residuals. Do they appear normal?
+------------------------------------------
+
+No. Residuals seem to be relatively smaller as Area gets bigger.
+
+```{r}
+qqplot(Area,resIBI)
+##abline(coef(lm(resIBI~Area))["(Intercept)"], coef(lm(resIBI~Area))["Area"]) Miksei tämä toimi?
+
+```
+This is confirmed by the form of the qq-plot, values for residuals are smaller than expected, withe lasger values of Area.
+
+
+10.4.(h) Does model given in (c) seem reasonable?
+-------------------------------
+
+Yes, it seems good enough, ie there is a significant positive linear relationship between IBI and Area. 
+```{r}
+plot(Area,IBI)
+abline(olsIBI, col="red", lwd=2)
+```
+
+
+Howerver some other form of a model could fit the data better for smaller Areas.
+
+Let's try 3rd degree polynomial:
+```{r}
+lm3=lm(IBI~poly(Area,3, raw=TRUE))
+summary(lm3)
+anova(olsIBI,lm3)
+plot(Area,IBI)
+points(Area, predict(lm3), type="l", col="blue", lwd=2) ##Why does this give such many lines?
+abline(olsIBI, col="red", lwd=2)
+```
+But Anova gives a p-value of 0.8341 and the graph also shows that this is even worse than the linear model...
+
+```{r}
+
+logIBI=lm(IBI~log(Area), data=AreaIBI)
+summary(logIBI)
+anova(olsIBI,logIBI)
+plot(Area,IBI)
+coef(logIBI)
+curve(38.103+8.95*log(x), add=TRUE,col=2)
+## or: with(as.list(coef(logIBI)), curve(`(Intercept)`+`log(Area)`*log(x),add=TRUE,col="red"))
+abline(olsIBI, col="blue", lwd=2)
+```
+The Log-function on the other hand seems to model the data quite well, but the r-squared is less than in the linear model.  
+
+```{r}
+##Avec = seq(0,70,length=49)
+##lines(Avec, predict(logIBI,newdata=data.frame(Avec)), type="l", col="blue", lwd=2) Why doesn't this work?
+
+
+
+##logpred = predict(logIBI,newdata=data.frame(x=Avec))
+##est1 = predict(lm(y~x,data=AreaIBI),newdata=data.frame(x=Avec))
+##plot(est1,logpred) What does this indicate/visualize?
+
+```
+10.6.(a) 95% CI for mean respose corresponding to an area of 30 km2.
+----------------------------------------------------------------
+
+```{r}
+Area_p=30
+IBI_p = 52.923 + 0.4602 * Area_p
+t_stat=qt(0.975, 48)*sd(IBI)/sqrt(48)
+Upper= IBI_p+t_stat
+Lower= IBI_p-t_stat
+data.frame(Lower, Upper)
+
+```
+
+10.6. (b) 95% PI for future response.
+-------------------------------------
+
+```{r}
+Avec=c(1:70)
+IBI_PI=predict.lm(olsIBI, interval="predict",newdata=data.frame(Area=Avec),level=0.95)
+IBI_PI 
+IBI_PI[30,1:3]
+
+```
+ 
+10.6. (c) The meaning of the intervals of Ozark Highland streams.
+---------------------------------------------------------------
+
+The simple regression model gives us an approximated value for IBI corresponding to an Area of interest. For a mean Area of 30 km2 the mean for IBI is 66.73 and the confidence interval on the 95% level for this value is 61.42 and 72.03. This means that on the average for an area of 30 km2 the mean value of IBI will be included with 95% certainty in that interval.  
+
+For the future response the interval is quite a bit larger, because we have to take into account the unsertainty in knowing the population mean and in addition the data scatter. For the area of 30 km2 the prediction interval for IBI would be 33.12 and 100.33 which is significantly larger than the confidence interval for a mean value 61.42 and 72.03 and shows how much uncertainty there is related to this data due to the scatter of the values of IBI for values of area.
+
+10.6. (d) Results applicaple to other streams in Arkansas or other states?
+--------------------------------------------------------------
+
+These should be compared to values from other streams, but they are not to be applied as they are to other streams. These results are of streams typical to this area and there can be many features which might cause the situation and the results to be different in other regions. 
+
+How ever comparing to values from other regions would give interesting insight and help to analyze what might effect the IBI on a larger scale besides the area of the watershed for the streams.
+
+```
