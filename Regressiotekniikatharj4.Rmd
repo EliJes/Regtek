@@ -1,0 +1,134 @@
+UEF 3622213 Regressiotekniikat, harj työ 4 
+========================================================
+
+Elina Jeskanen, 256916
+-----------------------
+
+
+12.30 Do poets die young?
+
+a) Describe data
+----------------
+
+```{r}
+novels= c(57,90,67,56,90,72,56,90,80,74,73,86,53,72,86,82,74,60,79,80,79,77,64,72,88,75,79,74,85,71,78,57,54,50,59,72,60,77,50,49,73,39,73,61,90,77,57,72,82,54,62,74,65,83,86,73,79,63,72,85,91,77,66,75,90,35,86)
+
+poems=c(88,69,78,68,72,60,50,47,74,36,87,55,68,75,78,85,69,38,58,51,72,58,84,30,79,90,66,45,70,48,31,43)
+
+nonfiction=c(74,86,87,68,76,73,63,78,83,86,40,75,90,47,91,94,61,83,75,89,77,86,66,97)
+
+kirjailijat=rbind(data.frame(kirj="novels",ika=c(novels)), data.frame(kirj="poems",ika=c(poems)), data.frame(kirj="nonfiction",ika=c(nonfiction)))
+attach(kirjailijat)
+str(kirjailijat)
+kirjailijat
+
+kirjr=c("novels", "poems", "nonfiction")
+kat=c()
+for (i in kirjr){
+ka=c(mean(ika[kirj==i]))
+kat=c(kat,ka)
+}
+kat=round(kat, digits=2)
+kat_df=data.frame(cbind(kirj=kirjr,kat))
+kat_df
+kat
+
+boxplot(ika~kirj)
+
+par(mfrow=c(1,3))
+hist(novels)
+hist(poems)
+hist(nonfiction)
+par(mfrow=c(1,1))
+
+summary(novels)
+summary(poems)
+summary(nonfiction)
+
+round(tapply(ika,kirj, mean), digits=2)
+round(tapply(ika,kirj, var), digits=2)
+tapply(ika,kirj, length)
+
+```
+
+b) Anova assumptions
+---------------------
+
+* Independence of cases: 
+
+They are independent since the cases are "writers from different cultures and genres".There might be also relatives, but presumably cases are independent.
+  
+* Normality - the distributions of the residuals are normal:
+
+The distributions are left skewed, but a squared transformation  makes them nearly normal.
+
+```{r}
+par(mfrow=c(1,3))
+hist((novels)^2)
+hist((poems)^2)
+hist((nonfiction)^2)
+par(mfrow=c(1,1))
+
+lm_kirj=lm(ika~kirj)
+summary(lm_kirj)
+
+```
+
+* Equality (or "homogeneity") of variances, called homoscedasticity. 
+```{r}
+var((novels)^2)
+var((poems)^2)
+var((nonfiction)^2)
+```
+The variance among poem writers (and nonfiction) is quite a bit larger than in the novels writers, and since the number of data points is almost double among novelists compared to the other two groups, an so "increasing the risk of incorrectly reporting a significant difference in the means when none exists" http://www.basic.northwestern.edu/statguidefiles/oneway_anova_ass_viol.html
+
+
+c) Anova, results?
+------------------
+
+```{r}
+kirj_anova=aov(ika~kirj)
+summary(kirj_anova)
+plot(kirj_anova)
+
+oneway.test(ika~kirj)
+
+anova(lm_kirj)
+
+```
+
+Both tests (aov()/anova() and oneway.test()) indicate, that there is no significant difference (p< 0.01) in the means of the ages at which the different groups of writers died. 
+
+This is especially stromg evidence since the group sizes differed (rises the risk for false rejections) and the variances differed so that they were higher in the smaller groups (also rises the risk for false rejections)).
+
+
+d) Compare groups
+-----------------
+
+```{r}
+TukeyHSD(kirj_anova)
+```
+
+Group wise inspection reveals that the only significantly equal means in age of death are between the nonfiction and novel writers since zero is included in the confidence interval of difference between their means. 
+
+On the other hand means seem to be significantly different between poems writers and the other two groups.
+
+e) Compare with another contrast
+---------------------------------
+
+```{r}
+pairwise.t.test(ika, kirj)
+t.test(novels, poems)
+t.test(nonfiction, poems)
+t.test(nonfiction, novels)
+```
+
+This also confirms that there is a difference in means between poets and the other two groups, but not between the other groups. 
+
+The alternative hypotesis is: mean(poems)<> mean(nonfiction) & mean(novels).
+
+f) Multiple comparison
+-----------------------
+Multiple comparison gives similar results to the pairwise comparisons. However the TukeyHSD p-value for nonfiction - novels comparison test is much higher. 
+
+But is this due to the risks mentioned in section b) conserning different group sizes and variances in these groups?
