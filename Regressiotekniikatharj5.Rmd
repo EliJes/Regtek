@@ -1,0 +1,63 @@
+UEF 3622213 Regressiotekniikat, harj työ 5 
+========================================================
+
+Elina Jeskanen, 256916
+-----------------------
+
+Kaksisuuntainen varianssianalyysi ja monivertailu
+-------------------------------------------------
+
+
+```{r}
+rautapit=data.frame(padanmat=c(rep("alumiini",12), rep("savi",12), rep("rauta",12)), raaka=rep(c(rep("liha",4), rep("kahviherne", 4), rep("kasvikset",4)),3),
+  kat=c(1.77, 2.36, 1.96, 2.14, 2.40, 2.17, 2.41, 2.34, 1.03, 1.53, 1.07, 1.30, 2.27, 1.28, 2.48, 2.68, 2.41, 2.43, 2.48, 2.57, 1.55, 0.79, 1.68, 1.82, 5.27, 5.17, 4.06, 4.22, 3.69, 3.43, 3.84, 3.72, 2.45, 2.99, 2.80, 2.92))
+attach(rautapit)
+```
+
+a) Taulukko materiaalin mukaisten ryhmien tunnusluvuista
+--------------------------------------------------------
+
+```{r}
+tapply(kat, padanmat, mean)
+tapply(kat, padanmat, sd)
+```
+
+b) Profiilikuviot keskiarvoista
+-------------------------------
+
+```{r}
+interaction.plot(raaka,padanmat,kat)
+```
+
+Rautapitoisuus on selvästi korkeampi kaikilla ruokaraaka-aineilla, kun ruoka valmistetaan rauta-astiassa.
+
+c) Kaksisuuntainen ANOVA-taulu ja tulkinnat
+-------------------------------------------
+
+```{r}
+malli=lm(kat~padanmat*raaka)
+summary(malli)
+anova(malli)
+anova(lm(kat~padanmat*raaka))
+```
+
+Myös Anova vahvistaa, että rautapitoisuus on selvästi korkeampi silloin kun ruoka valmistetaan rauta-astiassa. Myös raaka-aineella on väliä, eli valmistusasian materiaalista riippumatta kasvisten rautapitoisuus oli alhaisin. Ruoka-aineista korkein rautapitoisuus oli lihassa kun se valmistettiin rautapadassa, mutta savi ja alumiini padassa valmistettuna korkein arvo saatiin kahviherneestä.
+
+d) Yksisuuntainen varianssianalyysi ja monivertailut
+----------------------------------------------------
+
+```{r}
+yht=data.frame(yhtvaik=paste(padanmat, raaka), kat)
+tapply(yht$kat, yht$yhtvaik, mean)
+lm_yhtvaik=lm(yht$kat~yht$yhtvaik)
+summary(lm_yhtvaik)
+
+anova_yht=aov(yht$kat~yht$yhtvaik)
+summary(anova_yht)
+TukeyHSD(anova_yht)
+
+pairwise.t.test(yht$kat, yht$yhtvaik, p.adj = "bonf")
+
+```
+
+Monivertailu paljastaa selvästi mitkä yhdistelmät (raaka-aine & padan materiaali) tuottavat merkittävästi toisistaan poikkeavia rautapitoisuuksia. Bonferroni vertailu antaa arvon 1 kun arvot ovat lähekkäin ja hyvin pieniä lukuja kauimpana toisistaan oleville rautapitoisuuksille.
